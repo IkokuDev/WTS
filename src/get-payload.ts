@@ -1,16 +1,15 @@
 import dotenv from "dotenv"
 import path from "path"
-import type {InitOptions} from "payload/config"
-import payload, { Payload } from "payload"
+import payload from "payload"
+import type { Payload } from "payload"
 import nodemailer from "nodemailer"
 
-
 dotenv.config({
-    path : path.resolve(__dirname, '../.env')
+    path: path.resolve(__dirname, '../.env')
 })
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.resend.com',
+    host: 'smtp.resend.com',
     secure: true,
     port: 465,
     auth: {
@@ -21,49 +20,57 @@ const transporter = nodemailer.createTransport({
 
 let cached = (global as any).payload
 
-if(!cached){
+if (!cached) {
     cached = (global as any).payload = {
-        client : null,
+        client: null,
         promise: null,
     }
 }
 
-interface Args{
-    initOptions?: Partial<InitOptions>
+interface Args {
+    initOptions?: {
+        express?: any;
+        email?: {
+            transport: any;
+            fromAddress: string;
+            fromName: string;
+        };
+        secret?: string;
+        local?: boolean;
+        onInit?: (payload: Payload) => Promise<void>;
+    }
 }
 
 export const getPayloadClient = async ({
     initOptions,
-} : Args = {}): Promise<Payload> => {
-    if(!process.env.PAYLOAD_SECRET){
+}: Args = {}): Promise<Payload> => {
+    if (!process.env.PAYLOAD_SECRET) {
         throw new Error("PAYLOAD_SECRET is missing")
     }
 
-    if(cached.client){
+    if (cached.client) {
         return cached.client
     }
 
-    if(!cached.promise){
+    if (!cached.promise) {
         cached.promise = payload.init({
             email: {
                 transport: transporter,
                 fromAddress: "vellidevv@gmail.com",
-                fromName: "WTS"
-
+                fromName: "TheSahel"
             },
-            secret : process.env.PAYLOAD_SECRET,
-            local : initOptions?.express ? false : true,
-            ...(initOptions || {})
-
+            secret: process.env.PAYLOAD_SECRET,
+            local: initOptions?.express ? false : true,
+            ...initOptions
         })
     }
 
-    try{
+    try {
         cached.client = await cached.promise
-    } catch(e : unknown){
+    } catch (e: unknown) {
         cached.promise = null
         throw e
     }
+
     return cached.client
 }
-

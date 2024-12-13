@@ -9,6 +9,10 @@
 export interface Config {
   collections: {
     users: User;
+    'fleet-owners': FleetOwner;
+    drivers: Driver;
+    vehicles: Vehicle;
+    media: Media;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -20,7 +24,8 @@ export interface Config {
  */
 export interface User {
   id: string;
-  role: 'admin' | 'users';
+  role: 'admin' | 'customer' | 'fleet_owner' | 'driver';
+  name: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -28,9 +33,104 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fleet-owners".
+ */
+export interface FleetOwner {
+  id: string;
+  user: string | User;
+  companyName: string;
+  businessRegistrationNumber: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  documents: {
+    businessLicense: string | Media;
+    insuranceCertificate: string | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drivers".
+ */
+export interface Driver {
+  id: string;
+  user: string | User;
+  fleetOwner: string | FleetOwner;
+  licenseNumber: string;
+  licenseExpiry: string;
+  experience: number;
+  documents: {
+    driverLicense: string | Media;
+    medicalCertificate: string | Media;
+  };
+  status: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY';
+  assignedVehicle?: (string | null) | Vehicle;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicles".
+ */
+export interface Vehicle {
+  id: string;
+  fleetOwner: string | FleetOwner;
+  type: 'TRUCK' | 'VAN' | 'TRAILER';
+  make: string;
+  model: string;
+  year: number;
+  licensePlate: string;
+  capacity: {
+    weight: number;
+    volume: number;
+  };
+  documents: {
+    registration: string | Media;
+    insurance: string | Media;
+    inspection: string | Media;
+  };
+  status: 'AVAILABLE' | 'IN_USE' | 'MAINTENANCE';
+  maintenanceHistory?:
+    | {
+        date: string;
+        description: string;
+        cost: number;
+        id?: string | null;
+      }[]
+    | null;
+  assignedDriver?: (string | null) | Driver;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

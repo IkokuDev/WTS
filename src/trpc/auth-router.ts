@@ -26,7 +26,8 @@ export const authRouter = router({
         data: {
           email,
           password,
-          role: 'users'
+          role: 'customer',
+          name: email.split('@')[0],
         }
       })
       return{success: true, sentToEmail: email}

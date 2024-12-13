@@ -41,9 +41,20 @@ const Navbar = () =>{
 
                                     {user ? <span className="h-6 w-px bg-gray-200 aria-hidden='true'" /> : null}
 
+                                    <Link 
+                                        href="/drive-with-us" 
+                                        className={buttonVariants({
+                                            variant: 'ghost',
+                                            size: 'sm'
+                                        })}>
+                                        Drive With Us
+                                    </Link>
+
+                                    <span className="h-6 w-px bg-gray-200" aria-hidden='true' />
+
                                     {user ? null : <div className="flex lg:ml-6">
-                                        <span className="h-6 w-px bg-gray-200 aria-hidden='true'" />
-                                        </div>}
+                                        <span className="h-6 w-px bg-gray-200" aria-hidden='true' />
+                                    </div>}
                                     
                                     <div className="ml-4 flow-root lg:ml-6">
                                         <Cart/>
