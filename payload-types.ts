@@ -13,6 +13,8 @@ export interface Config {
     drivers: Driver;
     vehicles: Vehicle;
     media: Media;
+    vendors: Vendor;
+    products: Product;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -24,7 +26,7 @@ export interface Config {
  */
 export interface User {
   id: string;
-  role: 'admin' | 'customer' | 'fleet_owner' | 'driver';
+  role: 'admin' | 'customer' | 'fleet_owner' | 'driver' | 'vendor';
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -33,8 +35,6 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
-  _verified?: boolean | null;
-  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password: string | null;
@@ -134,6 +134,118 @@ export interface Vehicle {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vendors".
+ */
+export interface Vendor {
+  id: string;
+  user: string | User;
+  businessName: string;
+  businessType: 'solid_minerals' | 'agric_products' | 'raw_materials' | 'petrol_gas';
+  registrationNumber: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  documents: {
+    businessLicense: string | Media;
+    taxCertificate: string | Media;
+  };
+  status: 'PENDING' | 'APPROVED' | 'SUSPENDED';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  name: string;
+  description: {
+    [k: string]: unknown;
+  }[];
+  price: number;
+  vendor: string | Vendor;
+  category: 'solid_minerals' | 'agric_products' | 'raw_materials' | 'petrol_gas';
+  images: {
+    image: string | Media;
+    id?: string | null;
+  }[];
+  priceUnit: 'per_ton' | 'per_kg' | 'per_litre' | 'per_cubic_meter';
+  inventory: {
+    quantity: number;
+    lowStockThreshold: number;
+    trackingEnabled?: boolean | null;
+    allowBackorders?: boolean | null;
+    reservedQuantity: number;
+  };
+  bulkPricing?:
+    | {
+        minimumQuantity: number;
+        pricePerUnit: number;
+        unit: 'tons' | 'kg' | 'litres' | 'm3';
+        id?: string | null;
+      }[]
+    | null;
+  shipping: {
+    weight: number;
+    dimensions: {
+      length: number;
+      width: number;
+      height: number;
+    };
+    shippingMethods?:
+      | {
+          method: 'road_freight' | 'rail_freight' | 'sea_freight' | 'air_freight';
+          estimatedDays: number;
+          pricePerKm: number;
+          id?: string | null;
+        }[]
+      | null;
+    specialHandling?: boolean | null;
+    handlingInstructions?: string | null;
+  };
+  variants?:
+    | {
+        name: string;
+        sku: string;
+        attributes?: {
+          grade?: ('premium' | 'standard' | 'economy') | null;
+          purity?: number | null;
+          composition?: string | null;
+        };
+        price: number;
+        inventory: number;
+        id?: string | null;
+      }[]
+    | null;
+  specifications: {
+    weight: number;
+    dimensions: {
+      length: number;
+      width: number;
+      height: number;
+    };
+  };
+  minimumOrder: {
+    quantity: number;
+    unit: 'tons' | 'kg' | 'litres' | 'm3';
+  };
+  status?: ('active' | 'draft' | 'out_of_stock') | null;
+  certificates?:
+    | {
+        certificate: string | Media;
+        certificateType: 'quality_assurance' | 'safety' | 'origin' | 'other';
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -165,9 +277,4 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-
-
-declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
 }
