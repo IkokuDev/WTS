@@ -75,6 +75,34 @@ export const appRouter = router({
                 nextPage: response.hasNextPage ? response.nextPage : null,
             }
         }),
+    getProduct: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ input }) => {
+            const { id } = input;
+            const payload = await getPayloadClient();
+
+            const product = await payload.findByID({
+                collection: 'products',
+                id: id,
+            });
+
+            if (!product) return null;
+
+            // Explicitly map the payload response to match the Product type
+            return {
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                vendor: product.vendor,
+                category: product.category,
+                images: product.images,
+                priceUnit: product.priceUnit,
+                inventory: product.inventory,
+                updatedAt: product.updatedAt,
+                createdAt: product.createdAt,
+            } as Product;
+        }),
 });
 
 export type AppRouter = typeof appRouter;
