@@ -73,6 +73,11 @@ const ProductPage = ({ params }: PageProps) => {
               <h1 className='text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
                 {product.name}
               </h1>
+              {typeof product.vendor === 'object' && (
+                <p className='mt-2 text-lg text-gray-600'>
+                  Sold by: {product.vendor.businessName}
+                </p>
+              )}
             </div>
 
             <section className='mt-4'>
@@ -97,13 +102,46 @@ const ProductPage = ({ params }: PageProps) => {
                 <AccordionTrigger>Product Specifications</AccordionTrigger>
                 <AccordionContent>
                   <div className='space-y-4'>
-                    {product.specifications && (
+                    {/* Weight */}
+                    {product.specifications?.weight && (
+                      <div>
+                        <p className='font-medium'>Weight:</p>
+                        <p className='ml-4'>{product.specifications.weight} kg</p>
+                      </div>
+                    )}
+                    
+                    {/* Dimensions */}
+                    {product.specifications?.dimensions && (
                       <div>
                         <p className='font-medium'>Dimensions:</p>
-                        <p>Length: {product.specifications.dimensions.length}</p>
-                        <p>Width: {product.specifications.dimensions.width}</p>
-                        <p>Height: {product.specifications.dimensions.height}</p>
-                        <p>Weight: {product.specifications.weight}</p>
+                        <div className='ml-4 space-y-1'>
+                          <p>Length: {product.specifications.dimensions.length} cm</p>
+                          <p>Width: {product.specifications.dimensions.width} cm</p>
+                          <p>Height: {product.specifications.dimensions.height} cm</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Variants/Grades if available */}
+                    {product.variants && product.variants.length > 0 && (
+                      <div>
+                        <p className='font-medium'>Available Grades:</p>
+                        <div className='ml-4 space-y-1'>
+                          {product.variants.map((variant, index) => (
+                            <div key={index} className='mt-2'>
+                              <p className='font-medium'>{variant.name}:</p>
+                              {variant.attributes?.grade && (
+                                <p>Grade: {variant.attributes.grade}</p>
+                              )}
+                              {variant.attributes?.purity && (
+                                <p>Purity: {variant.attributes.purity}%</p>
+                              )}
+                              {variant.attributes?.composition && (
+                                <p>Composition: {variant.attributes.composition}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
