@@ -4,14 +4,10 @@ import { nextApp, nextHandler } from './next-utils'
 import * as trpcExpress from '@trpc/server/adapters/express'
 import { appRouter } from './trpc'
 import { Payload } from 'payload'
+import { createContext } from './trpc/trpc-context'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3000
-
-const createContext = ({req, res}: trpcExpress.CreateExpressContextOptions) => ({
-    req,
-    res,
-})
 
 const start = async () => {
     try {
@@ -26,7 +22,7 @@ const start = async () => {
 
         app.use('/api/trpc', trpcExpress.createExpressMiddleware({
             router: appRouter,
-            createContext 
+            createContext
         }))
 
         app.use((req, res) => nextHandler(req, res))

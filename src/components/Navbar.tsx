@@ -1,3 +1,4 @@
+import { getServerSideUser } from "@/lib/payload-utils"
 import Link from "next/link"
 import MaxWidthWrapper from "./MaxWidthWrapper"
 import { Icons } from "./Icons"
@@ -5,9 +6,12 @@ import NavItems from "./NavItems"
 import { buttonVariants } from './ui/button'
 import Cart from "./Cart"
 import { Menu } from 'lucide-react'
+import UserAccountNav from "./UserAccountNav"
 
-const Navbar = () =>{
-    const user = null
+const Navbar = async () => {
+    const user = await getServerSideUser()
+    
+    console.log('Navbar user:', user)
 
     return (
         <div className="bg-white sticky z-50 top-0 inset-x-0 h-16">
@@ -37,28 +41,29 @@ const Navbar = () =>{
                                 
                                 <div className='ml-auto flex items-center'>
                                     <div className='hidden lg:flex lg:items-center lg:justify-end lg:space-x-6'>
-                                        {user ? null : (
-                                            <Link 
-                                                href='/sign-in' 
-                                                className={buttonVariants({
-                                                    variant: 'ghost',
-                                                    size: 'sm'
-                                                })}
-                                            >
-                                                Sign In
-                                            </Link>
-                                        )}
-
-                                        {user ? null : (
-                                            <Link 
-                                                href="/sign-up" 
-                                                className={buttonVariants({
-                                                    variant: 'ghost',
-                                                    size: 'sm'
-                                                })}
-                                            >
-                                                Sign Up
-                                            </Link>
+                                        {user ? (
+                                            <UserAccountNav user={user} />
+                                        ) : (
+                                            <>
+                                                <Link 
+                                                    href='/sign-in' 
+                                                    className={buttonVariants({
+                                                        variant: 'ghost',
+                                                        size: 'sm'
+                                                    })}
+                                                >
+                                                    Sign In
+                                                </Link>
+                                                <Link 
+                                                    href="/sign-up" 
+                                                    className={buttonVariants({
+                                                        variant: 'ghost',
+                                                        size: 'sm'
+                                                    })}
+                                                >
+                                                    Sign Up
+                                                </Link>
+                                            </>
                                         )}
 
                                         <div className="ml-4">

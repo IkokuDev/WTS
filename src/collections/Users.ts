@@ -3,29 +3,44 @@ import { CollectionConfig } from "payload/types";
 export const Users: CollectionConfig = {
     slug: 'users',
     auth: true,
-    admin: {
-        useAsTitle: 'email',
-    },
     access: {
         read: () => true,
+        create: () => true,
     },
     fields: [
         {
             name: 'role',
             type: 'select',
-            required: true,
             options: [
                 { label: 'Admin', value: 'admin' },
                 { label: 'Customer', value: 'customer' },
-                { label: 'Fleet Owner', value: 'fleet_owner' },
-                { label: 'Driver', value: 'driver' },
-                {label: 'Vendor', value: 'vendor'}
-            ]
+            ],
+            required: true,
         },
         {
-            name: 'name',
+            name: '_verified',
+            type: 'checkbox',
+            access: {
+                read: () => true,
+                create: () => true,
+                update: () => true,
+            },
+            admin: {
+                position: 'sidebar',
+            },
+            defaultValue: false,
+        },
+        {
+            name: '_verificationToken',
             type: 'text',
-            required: true,
-        }
+            access: {
+                read: () => true,
+                create: () => true,
+                update: () => true,
+            },
+            admin: {
+                position: 'sidebar',
+            },
+        },
     ]
 }

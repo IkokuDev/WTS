@@ -10,10 +10,11 @@ import { Vehicles } from "./collections/Vehicles";
 import { Media } from "./collections/Media";
 import { Vendors } from "./collections/Vendors";
 import { Products } from "./collections/Products";
+import { Orders } from "./collections/Orders";
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  collections: [Users, FleetOwners, Drivers, Vehicles, Media, Vendors, Products],
+  collections: [Users, FleetOwners, Drivers, Vehicles, Media, Vendors, Products, Orders],
   routes: {
     admin: '/sell', // This means Payload admin will be at /sell
   },

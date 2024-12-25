@@ -15,6 +15,7 @@ export interface Config {
     media: Media;
     vendors: Vendor;
     products: Product;
+    orders: Order;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -26,8 +27,9 @@ export interface Config {
  */
 export interface User {
   id: string;
-  role: 'admin' | 'customer' | 'fleet_owner' | 'driver' | 'vendor';
-  name: string;
+  role: 'admin' | 'customer';
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -246,6 +248,23 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  user: string | User;
+  products: {
+    product: string | Product;
+    quantity: number;
+    id?: string | null;
+  }[];
+  total: number;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -277,4 +296,9 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+
+
+declare module 'payload' {
+  export interface GeneratedTypes extends Config {}
 }
