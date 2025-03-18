@@ -23,9 +23,28 @@ const OrdersPage = async () => {
   
   if (!user) return null
 
+  try {
   const orders = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders?where[products.vendor][equals]=${user.id}&depth=2`
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders?depth=2`
   ).then((res) => res.json()) as { docs: Order[] }
+
+    if (!orders?.docs) {
+      return (
+        <div className='flex flex-col gap-4'>
+          <h1 className='font-bold text-3xl'>Orders</h1>
+          <p>No orders found.</p>
+        </div>
+      )
+    }
+
+    // Filter orders that contain products from this vendor
+    const vendorOrders = orders.docs.filter(order => {
+      const orderProducts = order.products as OrderProduct[]
+      return orderProducts.some(item => {
+        const product = item.product as Product
+        return product.vendor === user.id
+      })
+    })
 
   return (
     <div className='flex flex-col gap-4'>
@@ -43,9 +62,13 @@ const OrdersPage = async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.docs.map((order) => {
+            {vendorOrders.map((order) => {
             const orderUser = order.user as User
-            const orderProducts = order.products as OrderProduct[]
+              const orderProducts = (order.products as OrderProduct[])
+                .filter(item => {
+                  const product = item.product as Product
+                  return product.vendor === user.id
+                })
             
             return (
               <TableRow key={order.id}>
@@ -80,6 +103,15 @@ const OrdersPage = async () => {
       </Table>
     </div>
   )
+  } catch (error) {
+    console.error('Error fetching orders:', error)
+    return (
+      <div className='flex flex-col gap-4'>
+        <h1 className='font-bold text-3xl'>Orders</h1>
+        <p className='text-red-500'>Error loading orders. Please try again later.</p>
+      </div>
+    )
+  }
 }
 
 export default OrdersPage 

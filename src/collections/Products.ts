@@ -74,6 +74,17 @@ export const Products: CollectionConfig = {
         { label: 'Per Cubic Meter', value: 'per_cubic_meter' },
       ]
     },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Draft', value: 'draft' },
+        { label: 'Out of Stock', value: 'out_of_stock' },
+      ]
+    },
     // Inventory Tracking
     {
       name: 'inventory',
@@ -107,6 +118,91 @@ export const Products: CollectionConfig = {
           required: true,
           defaultValue: 0,
           min: 0,
+        }
+      ]
+    },
+    // NCX Integration
+    {
+      name: 'ncx',
+      type: 'group',
+      fields: [
+        {
+          name: 'listed',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'List on NCX',
+        },
+        {
+          name: 'warehouseId',
+          type: 'text',
+          admin: {
+            condition: (data) => data.ncx?.listed,
+          }
+        },
+        {
+          name: 'qualityTestingId',
+          type: 'text',
+          admin: {
+            condition: (data) => data.ncx?.listed,
+          }
+        },
+        {
+          name: 'marketPrice',
+          type: 'number',
+          min: 0,
+          admin: {
+            condition: (data) => data.ncx?.listed,
+          }
+        },
+        {
+          name: 'featured',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: {
+            condition: (data) => data.ncx?.listed,
+          }
+        }
+      ]
+    },
+    // Paystar Integration
+    {
+      name: 'paystar',
+      type: 'group',
+      fields: [
+        {
+          name: 'insuranceRequired',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Require Insurance',
+        },
+        {
+          name: 'insuranceCoverage',
+          type: 'number',
+          min: 0,
+          admin: {
+            condition: (data) => data.paystar?.insuranceRequired,
+          }
+        },
+        {
+          name: 'creditFacility',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Enable Credit Facility',
+        },
+        {
+          name: 'creditAmount',
+          type: 'number',
+          min: 0,
+          admin: {
+            condition: (data) => data.paystar?.creditFacility,
+          }
+        },
+        {
+          name: 'commissionRate',
+          type: 'number',
+          min: 0,
+          max: 100,
+          label: 'Commission Rate (%)',
         }
       ]
     },
@@ -330,16 +426,6 @@ export const Products: CollectionConfig = {
             { label: 'Cubic Meters', value: 'm3' },
           ]
         }
-      ]
-    },
-    {
-      name: 'status',
-      type: 'select',
-      defaultValue: 'active',
-      options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Draft', value: 'draft' },
-        { label: 'Out of Stock', value: 'out_of_stock' },
       ]
     },
     {

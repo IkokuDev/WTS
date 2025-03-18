@@ -21,6 +21,7 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const productFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -33,9 +34,9 @@ const productFormSchema = z.object({
   inventory: z.object({
     quantity: z.string().min(1, 'Quantity is required'),
     lowStockThreshold: z.string().min(1, 'Low stock threshold is required'),
-    trackingEnabled: z.boolean().optional(),
-    allowBackorders: z.boolean().optional(),
-    reservedQuantity: z.string().optional(),
+    trackingEnabled: z.boolean().default(true),
+    allowBackorders: z.boolean().default(false),
+    reservedQuantity: z.string().default('0'),
   }),
   images: z.array(z.object({
     image: z.string()
@@ -44,6 +45,26 @@ const productFormSchema = z.object({
     quantity: z.number(),
     unit: z.enum(['tons', 'kg', 'litres', 'm3'])
   }).optional(),
+  ncx: z.object({
+    listed: z.boolean().default(false),
+    warehouseId: z.string().optional(),
+    qualityTestingId: z.string().optional(),
+    marketPrice: z.string().optional(),
+    featured: z.boolean().default(false),
+  }).default({
+    listed: false,
+    featured: false,
+  }),
+  paystar: z.object({
+    insuranceRequired: z.boolean().default(false),
+    insuranceCoverage: z.string().optional(),
+    creditFacility: z.boolean().default(false),
+    creditAmount: z.string().optional(),
+    commissionRate: z.string().optional(),
+  }).default({
+    insuranceRequired: false,
+    creditFacility: false,
+  }),
 })
 
 type ProductFormValues = z.infer<typeof productFormSchema>
@@ -59,37 +80,27 @@ const ProductForm = ({ initialData, isEditing }: ProductFormProps) => {
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: initialData ? {
-      name: initialData.name,
-      description: Array.isArray(initialData.description) 
-        ? initialData.description.map(item => 
-            typeof item === 'string' ? item : JSON.stringify(item)
-          ).join('\n')
-        : '',
-      price: initialData.price.toString(),
-      category: initialData.category,
-      priceUnit: initialData.priceUnit,
-      status: initialData.status || 'active',
+    defaultValues: {
+      name: initialData?.name ?? '',
+      description: initialData?.description ? JSON.stringify(initialData.description) : '',
+      price: initialData?.price?.toString() ?? '',
+      category: initialData?.category ?? 'solid_minerals',
+      priceUnit: initialData?.priceUnit ?? 'per_ton',
+      status: initialData?.status ?? 'active',
       inventory: {
-        quantity: initialData.inventory.quantity.toString(),
-        lowStockThreshold: initialData.inventory.lowStockThreshold.toString(),
-        trackingEnabled: initialData.inventory.trackingEnabled ?? true,
-        allowBackorders: initialData.inventory.allowBackorders ?? false,
-        reservedQuantity: initialData.inventory.reservedQuantity?.toString() ?? '0',
-      }
-    } : {
-      name: '',
-      description: '',
-      price: '',
-      category: 'solid_minerals',
-      priceUnit: 'per_ton',
-      status: 'active',
-      inventory: {
-        quantity: '0',
-        lowStockThreshold: '10',
+        quantity: initialData?.inventory?.quantity?.toString() ?? '0',
+        lowStockThreshold: initialData?.inventory?.lowStockThreshold?.toString() ?? '10',
         trackingEnabled: true,
         allowBackorders: false,
         reservedQuantity: '0',
+      },
+      ncx: {
+        listed: false,
+        featured: false,
+      },
+      paystar: {
+        insuranceRequired: false,
+        creditFacility: false,
       }
     }
   })
@@ -255,6 +266,162 @@ const ProductForm = ({ initialData, isEditing }: ProductFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Low Stock Threshold</FormLabel>
+                <FormControl>
+                  <Input type='number' disabled={isLoading} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* NCX Integration Section */}
+        <div className='space-y-4 border rounded-lg p-4'>
+          <h2 className='text-lg font-semibold'>NCX Integration</h2>
+          
+          <FormField
+            control={form.control}
+            name='ncx.listed'
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox 
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel>List on NCX</FormLabel>
+              </FormItem>
+            )}
+          />
+
+          {form.watch('ncx.listed') && (
+            <>
+              <FormField
+                control={form.control}
+                name='ncx.warehouseId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Warehouse ID</FormLabel>
+                    <FormControl>
+                      <Input disabled={isLoading} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='ncx.qualityTestingId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quality Testing ID</FormLabel>
+                    <FormControl>
+                      <Input disabled={isLoading} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='ncx.featured'
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormLabel>Featured Listing</FormLabel>
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+        </div>
+
+        {/* Paystar Integration Section */}
+        <div className='space-y-4 border rounded-lg p-4'>
+          <h2 className='text-lg font-semibold'>Paystar Integration</h2>
+          
+          <FormField
+            control={form.control}
+            name='paystar.insuranceRequired'
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox 
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel>Require Insurance</FormLabel>
+              </FormItem>
+            )}
+          />
+
+          {form.watch('paystar.insuranceRequired') && (
+            <FormField
+              control={form.control}
+              name='paystar.insuranceCoverage'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Insurance Coverage Amount</FormLabel>
+                  <FormControl>
+                    <Input type='number' disabled={isLoading} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name='paystar.creditFacility'
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox 
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel>Enable Credit Facility</FormLabel>
+              </FormItem>
+            )}
+          />
+
+          {form.watch('paystar.creditFacility') && (
+            <FormField
+              control={form.control}
+              name='paystar.creditAmount'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Maximum Credit Amount</FormLabel>
+                  <FormControl>
+                    <Input type='number' disabled={isLoading} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
+            name='paystar.commissionRate'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Commission Rate (%)</FormLabel>
                 <FormControl>
                   <Input type='number' disabled={isLoading} {...field} />
                 </FormControl>

@@ -14,6 +14,7 @@ interface NavItemProps {
   close: () => void
   isOpen: boolean
   isAnyOpen: boolean
+  imageSrc: string
 }
 
 const NavItem = ({
@@ -22,6 +23,7 @@ const NavItem = ({
   close,
   isOpen,
   isAnyOpen,
+  imageSrc,
 }: NavItemProps) => {
   return (
     <div className='flex'>

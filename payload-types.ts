@@ -176,12 +176,27 @@ export interface Product {
     id?: string | null;
   }[];
   priceUnit: 'per_ton' | 'per_kg' | 'per_litre' | 'per_cubic_meter';
+  status: 'active' | 'draft' | 'out_of_stock';
   inventory: {
     quantity: number;
     lowStockThreshold: number;
     trackingEnabled?: boolean | null;
     allowBackorders?: boolean | null;
     reservedQuantity: number;
+  };
+  ncx?: {
+    listed?: boolean | null;
+    warehouseId?: string | null;
+    qualityTestingId?: string | null;
+    marketPrice?: number | null;
+    featured?: boolean | null;
+  };
+  paystar?: {
+    insuranceRequired?: boolean | null;
+    insuranceCoverage?: number | null;
+    creditFacility?: boolean | null;
+    creditAmount?: number | null;
+    commissionRate?: number | null;
   };
   bulkPricing?:
     | {
@@ -235,7 +250,6 @@ export interface Product {
     quantity: number;
     unit: 'tons' | 'kg' | 'litres' | 'm3';
   };
-  status?: ('active' | 'draft' | 'out_of_stock') | null;
   certificates?:
     | {
         certificate: string | Media;

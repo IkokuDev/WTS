@@ -2,7 +2,7 @@ import { getServerSideUser } from '@/lib/payload-utils'
 import { Product, Vendor } from '../../../../payload-types'
 import { formatPrice } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Star, Shield, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import {
   Table,
@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
 const ProductsPage = async () => {
   const user = await getServerSideUser()
@@ -42,6 +43,8 @@ const ProductsPage = async () => {
             <TableHead>Price</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Inventory</TableHead>
+            <TableHead>NCX</TableHead>
+            <TableHead>Paystar</TableHead>
             <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -56,10 +59,42 @@ const ProductsPage = async () => {
                 {formatPrice(product.price)} {product.priceUnit}
               </TableCell>
               <TableCell className='capitalize'>
-                {product.status}
+                <Badge variant={
+                  product.status === 'active' ? 'success' :
+                  product.status === 'draft' ? 'secondary' :
+                  'destructive'
+                }>
+                  {product.status}
+                </Badge>
               </TableCell>
               <TableCell>
                 {product.inventory.quantity} {product.priceUnit}
+              </TableCell>
+              <TableCell>
+                <div className='flex items-center gap-2'>
+                  {product.ncx?.listed && (
+                    <Badge variant='secondary' className='gap-1'>
+                      NCX
+                      {product.ncx.featured && (
+                        <Star className='h-3 w-3 fill-current' />
+                      )}
+                    </Badge>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className='flex items-center gap-2'>
+                  {product.paystar?.insuranceRequired && (
+                    <Badge variant='secondary' className='gap-1'>
+                      <Shield className='h-3 w-3' />
+                    </Badge>
+                  )}
+                  {product.paystar?.creditFacility && (
+                    <Badge variant='secondary' className='gap-1'>
+                      <CreditCard className='h-3 w-3' />
+                    </Badge>
+                  )}
+                </div>
               </TableCell>
               <TableCell className='text-right'>
                 <Link href={`/dashboard/products/${product.id}`}>

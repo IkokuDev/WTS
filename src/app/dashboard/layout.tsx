@@ -1,26 +1,45 @@
-import { redirect } from 'next/navigation'
-import { getServerSideUser } from '@/lib/payload-utils'
-import DashboardNav from '@/components/DashboardNav'
+import { PropsWithChildren } from 'react'
+import { DASHBOARD_NAVIGATION } from '@/config/dashboard'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
-const DashboardLayout = async ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
-  const user = await getServerSideUser()
-  
-  if (!user) {
-    redirect('/sign-in?origin=/dashboard')
-  }
+export default function DashboardLayout({ children }: PropsWithChildren) {
+  const pathname = usePathname()
 
   return (
-    <div className='flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 max-w-7xl mx-auto p-8'>
-      <aside className='sm:w-64'>
-        <DashboardNav />
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-900 text-white">
+        <div className="p-4">
+          <h2 className="text-xl font-bold">Dashboard</h2>
+        </div>
+        <nav className="mt-4">
+          {DASHBOARD_NAVIGATION.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center px-4 py-2 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                )}
+              >
+                <item.icon className="mr-3 h-5 w-5" />
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
       </aside>
-      <main className='flex-1'>{children}</main>
+
+      {/* Main content */}
+      <main className="flex-1 bg-gray-100">
+        <div className="p-8">{children}</div>
+      </main>
     </div>
   )
 }
-
-export default DashboardLayout
